@@ -1,3 +1,11 @@
+:root {
+  --color-primary: #20242e;
+  --color-secondary: #2e4561;
+  --color-gray-1: #303436;
+  --color-gray-2: #e8e6e3;
+  --color-white: #ffffff;
+}
+
 html,
 body {
   padding: 0;
