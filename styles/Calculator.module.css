@@ -54,4 +54,79 @@
 
 .calculatorTable {
   padding: 0.825em;
+  display: block;
+  max-width: 100%;
+  margin-top: 2em;
+}
+
+.calculatorTable table {
+  width: 100%;
+  border-spacing: 0;
+  background-color: var(--color-gray-2);
+}
+
+.calculatorTable table thead {
+  background-color: var(--color-gray-1);
+  color: var(--color-white);
+}
+
+.calculatorTable table tbody {
+  background-color: #f3f4f6;
+}
+
+.calculatorTable table th,
+.calculatorTable table td {
+  padding: 0em;
+  font-size: 1.15em;
+}
+
+.calculatorTable table th {
+  padding: 0.5em;
+}
+
+.calculatorTable table td {
+  padding: 0.105em 0;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+.calculatorTable table td input {
+  flex-grow: 1;
+  margin: 0.105em;
+}
+
+.calculatorTable__removeMember {
+  display: flex;
+  background-color: var(--color-white);
+  color: var(--color-primary);
+  border-radius: 3px;
+  font-size: 1.215em;
+  padding: 0.125em;
+  border: 0;
+  border: 1px solid var(--color-white);
+}
+
+.calculatorTable__removeMember:hover {
+  color: #ef4444;
+  border: 1px solid var(--color-secondary);
+  cursor: pointer;
+}
+
+.calculatorTable__actionButton {
+  background: var(--color-primary);
+  color: var(--color-white);
+  cursor: pointer;
+  padding: 0.75em;
+  border: 0;
+}
+
+.calculatorTable__personalCut {
+  display: flex;
+  align-items: center;
+  color: #2f855a;
+  font-weight: bold;
+  font-size: 1.175em;
 }

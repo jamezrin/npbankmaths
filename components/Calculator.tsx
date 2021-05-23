@@ -1,10 +1,20 @@
 import BrandedLabelInput from '../components/BrandedLabelInput';
 import styles from '../styles/Calculator.module.css';
 import React, { createElement, useContext, useReducer } from 'react';
-import { FaDollarSign, FaUserTimes } from 'react-icons/fa';
-import { Column, useFlexLayout, useTable } from 'react-table';
+import { FaCentercode, FaDollarSign, FaUserTimes } from 'react-icons/fa';
+import {
+  CellPropGetter,
+  Column,
+  HeaderPropGetter,
+  PropGetter,
+  useFlexLayout,
+  useTable,
+} from 'react-table';
+import { BrandedInput } from './BrandedInput';
 
-const numberTargetValue = (consumer: (value: number) => void): ((e: React.ChangeEvent<HTMLInputElement>) => void) => {
+const numberTargetValue = (
+  consumer: (value: number) => void,
+): ((e: React.ChangeEvent<HTMLInputElement>) => void) => {
   return (e) => consumer(parseInt(e.target.value));
 };
 
@@ -27,7 +37,10 @@ type CalculatorState = {
   heistCrewMembers: HeistCrewType[];
 };
 
-const makeHeistCrewMember = ({ id, expenses }: Omit<HeistCrewType, 'alias'>): HeistCrewType => ({
+const makeHeistCrewMember = ({
+  id,
+  expenses,
+}: Omit<HeistCrewType, 'alias'>): HeistCrewType => ({
   id,
   alias: `Part ${id}`,
   expenses,
@@ -90,7 +103,10 @@ type CalculatorStateAction =
   | CrewMemberRemoveAction
   | CrewMemberAddAction;
 
-function reducer(state: CalculatorState, action: CalculatorStateAction): CalculatorState {
+function reducer(
+  state: CalculatorState,
+  action: CalculatorStateAction,
+): CalculatorState {
   switch (action.type) {
     case CHANGED_PAYOUT_FIELD:
       return {
@@ -104,28 +120,33 @@ function reducer(state: CalculatorState, action: CalculatorStateAction): Calcula
     case CHANGED_CREW_MEMBER_ALIAS:
       return {
         ...state,
-        heistCrewMembers: state.heistCrewMembers.map(({ alias, expenses, id }) => ({
-          alias: id === action.crewMemberId ? action.newAlias : alias,
-          expenses,
-          id,
-        })),
+        heistCrewMembers: state.heistCrewMembers.map(
+          ({ alias, expenses, id }) => ({
+            alias: id === action.crewMemberId ? action.newAlias : alias,
+            expenses,
+            id,
+          }),
+        ),
       };
 
     case CHANGED_CREW_MEMBER_EXPENSES:
       return {
         ...state,
-        heistCrewMembers: state.heistCrewMembers.map(({ alias, expenses, id }) => ({
-          expenses: id === action.crewMemberId ? action.newExpenses : expenses,
-          alias,
-          id,
-        })),
+        heistCrewMembers: state.heistCrewMembers.map(
+          ({ alias, expenses, id }) => ({
+            expenses:
+              id === action.crewMemberId ? action.newExpenses : expenses,
+            alias,
+            id,
+          }),
+        ),
       };
 
     case REMOVED_CREW_MEMBER:
       return {
         ...state,
         heistCrewMembers: state.heistCrewMembers.filter((crewMember) => {
-          return action.crewMemberId === crewMember.id;
+          return action.crewMemberId !== crewMember.id;
         }),
       };
 
@@ -146,9 +167,14 @@ function reducer(state: CalculatorState, action: CalculatorStateAction): Calcula
   }
 }
 
-type CalculatorContextType = [CalculatorState, React.Dispatch<CalculatorStateAction>];
+type CalculatorContextType = [
+  CalculatorState,
+  React.Dispatch<CalculatorStateAction>,
+];
 const initialCalculatorContext = null as unknown as CalculatorContextType;
-const CalculatorContext = React.createContext<CalculatorContextType>(initialCalculatorContext);
+const CalculatorContext = React.createContext<CalculatorContextType>(
+  initialCalculatorContext,
+);
 
 function Calculator() {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -156,10 +182,11 @@ function Calculator() {
   return (
     <div className={styles.calculatorContainer}>
       <section className={styles.calculator}>
-        <h2>NoPixel Bank Heist Take Calculator</h2>
+        <h2>NoPixel Bank Heist Cut Calculator</h2>
         <CalculatorContext.Provider value={[state, dispatch]}>
           <CalculatorInputs />
           <CalculatorTable />
+          <CalculatorActions />
         </CalculatorContext.Provider>
       </section>
     </div>
@@ -167,118 +194,178 @@ function Calculator() {
 }
 
 type ComputedCrewMember = HeistCrewType & {
-  take: number;
+  payoutCut: number;
+  payoutCutDistribution: any;
 };
 
-const calculateTotalPayout = ({
-  bankPayout: { cash, goldBarCount, goldBarValue, inkedBagCount, inkedBagValue, regularBagCount, regularBagValue },
+const calculateGrossPayout = ({
+  bankPayout: {
+    cash,
+    goldBarCount,
+    goldBarValue,
+    inkedBagCount,
+    inkedBagValue,
+    regularBagCount,
+    regularBagValue,
+  },
 }: CalculatorState): number =>
-  cash + goldBarCount * goldBarValue + inkedBagCount * inkedBagValue + regularBagCount * regularBagValue;
+  cash +
+  goldBarCount * goldBarValue +
+  inkedBagCount * inkedBagValue +
+  regularBagCount * regularBagValue;
+
+function CalculatorActions() {
+  const [state, dispatch] =
+    useContext<CalculatorContextType>(CalculatorContext);
+
+  return (
+    <div>
+      <button
+        className={styles.calculatorTable__actionButton}
+        onClick={() => {
+          dispatch({ type: 'ADDED_CREW_MEMBER' });
+        }}>
+        Add crew member
+      </button>
+    </div>
+  );
+}
 
 function CalculatorTable() {
-  const [state, dispatch] = useContext<CalculatorContextType>(CalculatorContext);
+  const [state, dispatch] =
+    useContext<CalculatorContextType>(CalculatorContext);
 
   const data = React.useMemo<Array<ComputedCrewMember>>(() => {
-    const summedExpenses = state.heistCrewMembers.reduce((acc, cur) => acc + cur.expenses, 0);
+    const sumOfExpenses = state.heistCrewMembers.reduce(
+      (acc, cur) => acc + (cur.expenses || 0),
+      0,
+    );
     const heistCrewMemberCount = state.heistCrewMembers.length;
-    const totalPayout = calculateTotalPayout(state);
-    const theoreticalPayout = totalPayout / heistCrewMemberCount;
-    const theoreticalExpense = summedExpenses / heistCrewMemberCount;
+    const grossPayout = calculateGrossPayout(state);
+    const netPayout = grossPayout - sumOfExpenses;
+    const crewMemberCut = netPayout / heistCrewMemberCount;
 
     return state.heistCrewMembers.map((crewMember) => {
-      const calculatedTake = Math.round(crewMember.expenses - theoreticalExpense + theoreticalPayout);
+      const payoutCut = Math.floor(crewMemberCut + (crewMember.expenses || 0));
       return {
         ...crewMember,
-        take: calculatedTake,
+        payoutCut,
+        payoutCutDistribution: 'WIP',
       };
     });
   }, [state]);
 
-  // https://react-table.tanstack.com/docs/examples/full-width-table
   // https://github.com/tannerlinsley/react-table/tree/master/examples/full-width-resizable-table
   const columns = React.useMemo<Column<ComputedCrewMember>[]>(
     () => [
       {
         Header: 'Alias',
         accessor: 'alias',
+        width: 20,
         Cell: ({ cell }) => (
-          <>
-            {cell.value} <FaUserTimes />
-          </>
+          <BrandedInput
+            value={cell.value}
+            onChange={(e) => {
+              dispatch({
+                type: 'CHANGED_CREW_MEMBER_ALIAS',
+                crewMemberId: cell.row.original.id,
+                newAlias: e.target.value,
+              });
+            }}
+          />
         ),
       },
       {
         Header: 'Expenses',
         accessor: 'expenses',
+        width: 20,
+        Cell: ({ cell }) => (
+          <BrandedInput
+            value={cell.value || ''}
+            onChange={numberTargetValue((value) => {
+              dispatch({
+                type: 'CHANGED_CREW_MEMBER_EXPENSES',
+                crewMemberId: cell.row.original.id,
+                newExpenses: value,
+              });
+            })}
+          />
+        ),
       },
       {
-        Header: 'Take',
-        accessor: 'take',
+        Header: 'Personal Cut',
+        accessor: 'payoutCut',
+        width: 20,
+        Cell: ({ cell }) => (
+          <div className={styles.calculatorTable__personalCut}>
+            {cell.value}
+            <FaDollarSign />
+          </div>
+        ),
+      },
+      {
+        Header: '',
+        accessor: 'payoutCutDistribution',
+        width: 200,
+        Cell: ({ cell }) => <div></div>,
+      },
+      {
+        Header: 'Actions',
+        accessor: 'id',
+        width: 15,
+        Cell: ({ cell }) => (
+          <button
+            className={styles.calculatorTable__removeMember}
+            onClick={() => {
+              dispatch({
+                type: 'REMOVED_CREW_MEMBER',
+                crewMemberId: cell.value,
+              });
+            }}>
+            <FaUserTimes />
+          </button>
+        ),
       },
     ],
     [],
   );
 
-  const tableInstance = useTable({
-    columns: columns,
-    data: data,
-  });
+  const tableInstance = useTable(
+    {
+      columns: columns,
+      data: data,
+    },
+    useFlexLayout,
+  );
 
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = tableInstance;
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
+    tableInstance;
 
   return (
     <div className={styles.calculatorTable}>
       <table {...getTableProps()}>
         <thead>
-          {
-            // Loop over the header rows
-            headerGroups.map((headerGroup) => (
-              // Apply the header row props
-              <tr {...headerGroup.getHeaderGroupProps()}>
-                {
-                  // Loop over the headers in each row
-                  headerGroup.headers.map((column) => (
-                    // Apply the header cell props
-                    <th {...column.getHeaderProps()}>
-                      {
-                        // Render the header
-                        column.render('Header')
-                      }
-                    </th>
-                  ))
-                }
-              </tr>
-            ))
-          }
+          {headerGroups.map((headerGroup) => (
+            <tr {...headerGroup.getHeaderGroupProps()}>
+              {headerGroup.headers.map((column) => (
+                <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+              ))}
+            </tr>
+          ))}
         </thead>
-        {/* Apply the table body props */}
         <tbody {...getTableBodyProps()}>
-          {
-            // Loop over the table rows
-            rows.map((row) => {
-              // Prepare the row for display
-              prepareRow(row);
-              return (
-                // Apply the row props
-                <tr {...row.getRowProps()}>
-                  {
-                    // Loop over the rows cells
-                    row.cells.map((cell) => {
-                      // Apply the cell props
-                      return (
-                        <td {...cell.getCellProps()}>
-                          {
-                            // Render the cell contents
-                            cell.render('Cell')
-                          }
-                        </td>
-                      );
-                    })
-                  }
-                </tr>
-              );
-            })
-          }
+          {rows.map((row) => {
+            prepareRow(row);
+            return (
+              <tr {...row.getRowProps()}>
+                {row.cells.map((cell) => {
+                  return (
+                    <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -286,7 +373,8 @@ function CalculatorTable() {
 }
 
 function CalculatorInputs() {
-  const [state, dispatch] = useContext<CalculatorContextType>(CalculatorContext);
+  const [state, dispatch] =
+    useContext<CalculatorContextType>(CalculatorContext);
 
   return (
     <div className={styles.payoutBar}>
@@ -303,8 +391,7 @@ function CalculatorInputs() {
               field: 'cash',
               value,
             }),
-          )}
-        >
+          )}>
           Cash
         </BrandedLabelInput>
 
@@ -321,8 +408,7 @@ function CalculatorInputs() {
                 field: 'regularBagCount',
                 value,
               }),
-            )}
-          >
+            )}>
             Regular Bags
           </BrandedLabelInput>
           <BrandedLabelInput
@@ -337,8 +423,7 @@ function CalculatorInputs() {
                 field: 'regularBagValue',
                 value,
               }),
-            )}
-          >
+            )}>
             &times;
           </BrandedLabelInput>
         </div>
@@ -356,8 +441,7 @@ function CalculatorInputs() {
                 field: 'inkedBagCount',
                 value,
               }),
-            )}
-          >
+            )}>
             Inked Bags
           </BrandedLabelInput>
           <BrandedLabelInput
@@ -372,8 +456,7 @@ function CalculatorInputs() {
                 field: 'inkedBagValue',
                 value,
               }),
-            )}
-          >
+            )}>
             &times;
           </BrandedLabelInput>
         </div>
@@ -391,8 +474,7 @@ function CalculatorInputs() {
                 field: 'goldBarCount',
                 value,
               }),
-            )}
-          >
+            )}>
             Gold Bars
           </BrandedLabelInput>
           <BrandedLabelInput
@@ -407,14 +489,13 @@ function CalculatorInputs() {
                 field: 'goldBarValue',
                 value,
               }),
-            )}
-          >
+            )}>
             &times;
           </BrandedLabelInput>
         </div>
       </div>
       <div className={styles.payoutBar__summary}>
-        {calculateTotalPayout(state)}
+        {calculateGrossPayout(state)}
         <FaDollarSign />
       </div>
     </div>

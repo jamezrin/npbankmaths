@@ -6,8 +6,7 @@ const TwitterSocial = () => (
     href="https://twitter.com/jamezrin"
     style={{
       ['--hover-color' as any]: '#00acee',
-    }}
-  >
+    }}>
     <FaTwitter />
   </a>
 );
@@ -17,8 +16,7 @@ const GithubSocial = () => (
     href="https://github.com/jamezrin"
     style={{
       ['--hover-color' as any]: '#afb5bb',
-    }}
-  >
+    }}>
     <FaGithub />
   </a>
 );
