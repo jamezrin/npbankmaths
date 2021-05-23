@@ -46,6 +46,9 @@ const makeHeistCrewMember = ({
   expenses,
 });
 
+const getHighestCrewMemberId = (heistCrewMembers: HeistCrewType[]) =>
+  Math.max(...heistCrewMembers.map(({ id }) => id), 0);
+
 const initialState: CalculatorState = {
   bankPayout: {
     cash: 9000,
@@ -156,7 +159,7 @@ function reducer(
         heistCrewMembers: [
           ...state.heistCrewMembers,
           makeHeistCrewMember({
-            id: Math.max(...state.heistCrewMembers.map(({ id }) => id)) + 1,
+            id: getHighestCrewMemberId(state.heistCrewMembers) + 1,
             expenses: 0,
           }),
         ],
