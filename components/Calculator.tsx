@@ -219,7 +219,7 @@ function CalculatorActions() {
     useContext<CalculatorContextType>(CalculatorContext);
 
   return (
-    <div>
+    <div className={styles.calculatorTable__actionContainer}>
       <button
         className={styles.calculatorTable__actionButton}
         onClick={() => {
