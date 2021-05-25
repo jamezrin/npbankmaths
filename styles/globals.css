@@ -1,10 +1,6 @@
-:root {
-  --color-primary: #20242e;
-  --color-secondary: #2e4561;
-  --color-gray-1: #303436;
-  --color-gray-2: #e8e6e3;
-  --color-white: #ffffff;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 html,
 body {
@@ -21,4 +17,18 @@ a {
 
 * {
   box-sizing: border-box;
+}
+
+.custom-bg-bills {
+  background-image: url('/background.jpg');
+}
+
+.number-appearance-none::-webkit-outer-spin-button,
+.number-appearance-none::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.number-appearance-none {
+  -moz-appearance: textfield;
 }

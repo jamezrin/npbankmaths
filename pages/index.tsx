@@ -1,14 +1,6 @@
 import Head from 'next/head';
-import styles from '../styles/General.module.css';
 
-import Calculator from '../components/Calculator';
-import SocialLinks from '../components/SocialLinks';
-
-const Background = () => (
-  <div className={styles.backgroundWrapper}>
-    <div className={styles.backgroundChild} />
-  </div>
-);
+import CalculatorApp from '../components/CalculatorApp';
 
 function CalculatorPage() {
   return (
@@ -18,11 +10,7 @@ function CalculatorPage() {
         <link rel="icon" href="/dollar.png" />
       </Head>
 
-      <div className={styles.container}>
-        <Calculator />
-        <Background />
-        <SocialLinks />
-      </div>
+      <CalculatorApp />
     </>
   );
 }

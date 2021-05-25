@@ -4,5 +4,7 @@
   "trailingComma": "all",
   "singleQuote": true,
   "semi": true,
-  "jsxBracketSameLine": true
+  "jsxBracketSameLine": true,
+  "importOrder": ["^@[a-zA-Z0-9](.*)$", "^@/(.*)$", "^[./]"],
+  "importOrderSeparation": true
 }
