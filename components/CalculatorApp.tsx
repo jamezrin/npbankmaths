@@ -185,18 +185,16 @@ export const calculateGrossPayout = ({
   payoutRewards.inkedBags * rewardPrices.inkedBags +
   payoutRewards.goldBars * rewardPrices.goldBars;
 
-function CalculatorApp() {
+function CalculatorMain() {
   const [state, dispatch] = useReducer(reducer, initialState);
-
   return (
     <div className={cx('min-h-screen flex')}>
-      <Background />
       <div className={cx('p-3 md:p-6 lg:p-10 xl:p-16 flex flex-col')}>
         <div className={cx('text-3xl text-white flex items-center')}>
           <h1 className={cx('px-3 py-2 inline-block bg-brand-secondary')}>
             NoPixel Bank Heist Calculator
           </h1>
-          <div className={cx('ml-auto text-2xl')}>
+          <div className={cx('pl-2 ml-auto text-2xl')}>
             <SocialLinks />
           </div>
         </div>
@@ -225,6 +223,15 @@ function CalculatorApp() {
         </CalculatorContext.Provider>
       </div>
     </div>
+  );
+}
+
+function CalculatorApp() {
+  return (
+    <>
+      <Background />
+      <CalculatorMain />
+    </>
   );
 }
 
