@@ -17,7 +17,7 @@
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "3.3.0",
     "@types/react": "17.0.47",
-    "autoprefixer": "10.4.7",
+    "autoprefixer": "10.4.8",
     "postcss": "8.4.14",
     "prettier": "2.7.1",
     "tailwindcss": "3.1.6",
